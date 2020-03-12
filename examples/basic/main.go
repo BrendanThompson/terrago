@@ -17,7 +17,7 @@ func main() {
     TerraformDir: workingDirectory,
   }
   
-  _, err = terragoInitAndPlanE(options)
+  _, err = terrago.InitAndPlanE(options)
   if err != nil {
     log.Fatal(err)
   }
