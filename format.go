@@ -15,7 +15,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/collections"
 )
 
-// TerraformDefaultLockingStatus - The terratest default command lock status (backwards compatibility)
+// TerraformCommandsWithLockSupport - The terratest default command lock status (backwards compatibility)
 var TerraformCommandsWithLockSupport = []string{
 	"plan",
 	"apply",
