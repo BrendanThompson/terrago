@@ -17,7 +17,7 @@ func TestInitAndPlanWithError(t *testing.T) {
 		TerraformDir: testFolder,
 	}
 
-	_, err = InitAndPlanE(options)
+	_, err = InitAndPlan(options)
 	require.Error(t, err)
 }
 
@@ -31,7 +31,7 @@ func TestInitAndPlanWithNoError(t *testing.T) {
 		TerraformDir: testFolder,
 	}
 
-	out, err := InitAndPlanE(options)
+	out, err := InitAndPlan(options)
 	require.NoError(t, err)
 	require.Contains(t, out, "No changes. Infrastructure is up-to-date.")
 }
@@ -44,7 +44,10 @@ func TestPlanWithExitCodeWithNoChanges(t *testing.T) {
 	options := &Options{
 		TerraformDir: testFolder,
 	}
-	exitCode := InitAndPlanWithExitCode(options)
+	exitCode, err := InitAndPlanWithExitCode(options)
+	if err != nil {
+		t.Fatal(err)
+	}
 	require.Equal(t, DefaultSuccessExitCode, exitCode)
 }
 
@@ -59,7 +62,10 @@ func TestPlanWithExitCodeWithChanges(t *testing.T) {
 			"cnt": 1,
 		},
 	}
-	exitCode := InitAndPlanWithExitCode(options)
+	exitCode, err := InitAndPlanWithExitCode(options)
+	if err != nil {
+		t.Fatal(err)
+	}
 	require.Equal(t, TerraformPlanChangesPresentExitCode, exitCode)
 }
 
@@ -73,7 +79,7 @@ func TestPlanWithExitCodeWithFailure(t *testing.T) {
 		TerraformDir: testFolder,
 	}
 
-	exitCode, getExitCodeErr := InitAndPlanWithExitCodeE(options)
+	exitCode, getExitCodeErr := InitAndPlanWithExitCode(options)
 	require.NoError(t, getExitCodeErr)
 	require.Equal(t, exitCode, 1)
 }
