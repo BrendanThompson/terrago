@@ -17,18 +17,8 @@ type Either struct {
 }
 
 // DoWithTimeout runs the specified action and waits up to the specified timeout for it to complete. Return the output of the action if
-// it completes on time or fail the test otherwise.
-func DoWithTimeout(actionDescription string, timeout time.Duration, action func() (string, error)) string {
-	out, err := DoWithTimeoutE(actionDescription, timeout, action)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
-
-// DoWithTimeoutE runs the specified action and waits up to the specified timeout for it to complete. Return the output of the action if
 // it completes on time or an error otherwise.
-func DoWithTimeoutE(actionDescription string, timeout time.Duration, action func() (string, error)) (string, error) {
+func DoWithTimeout(actionDescription string, timeout time.Duration, action func() (string, error)) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
@@ -49,19 +39,8 @@ func DoWithTimeoutE(actionDescription string, timeout time.Duration, action func
 
 // DoWithRetry runs the specified action. If it returns a value, return that value. If it returns a FatalError, return that error
 // immediately. If it returns any other type of error, sleep for sleepBetweenRetries and try again, up to a maximum of
-// maxRetries retries. If maxRetries is exceeded, fail the test.
-func DoWithRetry(actionDescription string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) string {
-	out, err := DoWithRetryE(actionDescription, maxRetries, sleepBetweenRetries, action)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
-
-// DoWithRetryE runs the specified action. If it returns a value, return that value. If it returns a FatalError, return that error
-// immediately. If it returns any other type of error, sleep for sleepBetweenRetries and try again, up to a maximum of
 // maxRetries retries. If maxRetries is exceeded, return a MaxRetriesExceeded error.
-func DoWithRetryE(actionDescription string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) (string, error) {
+func DoWithRetry(actionDescription string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) (string, error) {
 	var output string
 	var err error
 
@@ -74,7 +53,7 @@ func DoWithRetryE(actionDescription string, maxRetries int, sleepBetweenRetries 
 		}
 
 		if _, isFatalErr := err.(FatalError); isFatalErr {
-			log.Printf("Returning due to fatal error: %v", err)
+			log.Printf("returning due to fatal error: %v", err)
 			return output, err
 		}
 
@@ -90,20 +69,7 @@ func DoWithRetryE(actionDescription string, maxRetries int, sleepBetweenRetries 
 // matches any of the regular expressions in the specified retryableErrors map. If there is a match, sleep for
 // sleepBetweenRetries, and retry the specified action, up to a maximum of maxRetries retries. If there is no match,
 // return that error immediately, wrapped in a FatalError. If maxRetries is exceeded, return a MaxRetriesExceeded error.
-func DoWithRetryableErrors(actionDescription string, retryableErrors map[string]string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) string {
-	out, err := DoWithRetryableErrorsE(actionDescription, retryableErrors, maxRetries, sleepBetweenRetries, action)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
-
-// DoWithRetryableErrorsE runs the specified action. If it returns a value, return that value. If it returns an error,
-// check if error message or the string output from the action (which is often stdout/stderr from running some command)
-// matches any of the regular expressions in the specified retryableErrors map. If there is a match, sleep for
-// sleepBetweenRetries, and retry the specified action, up to a maximum of maxRetries retries. If there is no match,
-// return that error immediately, wrapped in a FatalError. If maxRetries is exceeded, return a MaxRetriesExceeded error.
-func DoWithRetryableErrorsE(actionDescription string, retryableErrors map[string]string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) (string, error) {
+func DoWithRetryableErrors(actionDescription string, retryableErrors map[string]string, maxRetries int, sleepBetweenRetries time.Duration, action func() (string, error)) (string, error) {
 	retryableErrorsRegexp := map[*regexp.Regexp]string{}
 	for errorStr, errorMessage := range retryableErrors {
 		errorRegex, err := regexp.Compile(errorStr)
@@ -113,7 +79,7 @@ func DoWithRetryableErrorsE(actionDescription string, retryableErrors map[string
 		retryableErrorsRegexp[errorRegex] = errorMessage
 	}
 
-	return DoWithRetryE(actionDescription, maxRetries, sleepBetweenRetries, func() (string, error) {
+	return DoWithRetry(actionDescription, maxRetries, sleepBetweenRetries, func() (string, error) {
 		output, err := action()
 		if err == nil {
 			return output, nil
@@ -147,17 +113,17 @@ func DoInBackgroundUntilStopped(actionDescription string, sleepBetweenRepeats ti
 
 	go func() {
 		for {
-			log.Printf("Executing action '%s'", actionDescription)
+			log.Printf("executing action '%s'", actionDescription)
 
 			action()
 
-			log.Printf("Sleeping for %s before repeating action '%s'", sleepBetweenRepeats, actionDescription)
+			log.Printf("sleeping for %s before repeating action '%s'", sleepBetweenRepeats, actionDescription)
 
 			select {
 			case <-time.After(sleepBetweenRepeats):
 				// Nothing to do, just allow the loop to continue
 			case <-stop:
-				log.Printf("Received stop signal for action '%s'.", actionDescription)
+				log.Printf("received stop signal for action '%s'.", actionDescription)
 				return
 			}
 		}
@@ -194,5 +160,5 @@ type FatalError struct {
 }
 
 func (err FatalError) Error() string {
-	return fmt.Sprintf("FatalError{Underlying: %v}", err.Underlying)
+	return fmt.Sprintf("fatal underlying error: %v", err.Underlying)
 }
