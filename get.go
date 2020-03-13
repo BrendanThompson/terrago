@@ -13,5 +13,5 @@ func Get(options *Options) string {
 
 // GetE calls terraform get and return stdout/stderr.
 func GetE(options *Options) (string, error) {
-	return RunTerraformCommandE(options, "get", "-update")
+	return RunTerraformCommand(options, "get", "-update")
 }

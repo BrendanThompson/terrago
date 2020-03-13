@@ -28,18 +28,8 @@ func GetCommonOptions(options *Options, args ...string) (*Options, []string) {
 }
 
 // RunTerraformCommand runs `terraform` with the given arguments
-// and options. It then returns stdout
-func RunTerraformCommand(additionalOptions *Options, args ...string) string {
-	out, err := RunTerraformCommandE(additionalOptions, args...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
-
-// RunTerraformCommandE runs `terraform` with the given arguments
 // and options. It then returns stdout/stderr
-func RunTerraformCommandE(additionalOptions *Options, additionalArgs ...string) (string, error) {
+func RunTerraformCommand(additionalOptions *Options, additionalArgs ...string) (string, error) {
 	//TODO: Implement `GetCommonOptions`
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
@@ -58,8 +48,8 @@ func RunTerraformCommandE(additionalOptions *Options, additionalArgs ...string) 
 	})
 }
 
-// GetExitCodeForTerraformCommandE runs terraform with the given arguments and options and returns exit code
-func GetExitCodeForTerraformCommandE(additionalOptions *Options, additionalArgs ...string) (int, error) {
+// GetExitCodeForTerraformCommand runs terraform with the given arguments and options and returns exit code
+func GetExitCodeForTerraformCommand(additionalOptions *Options, additionalArgs ...string) (int, error) {
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
 	log.Printf("Running %s with args %v", options.TerraformBinary, args)

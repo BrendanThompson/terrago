@@ -18,7 +18,10 @@ func TestApplyNoError(t *testing.T) {
 		NoColor:      true,
 	}
 
-	out := InitAndApply(options)
+	out, err := InitAndApply(options)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	require.Contains(t, out, "Hello, World")
 
@@ -36,7 +39,7 @@ func TestApplyWithErrorNoRetry(t *testing.T) {
 		TerraformDir: testFolder,
 	}
 
-	out, err := InitAndApplyE(options)
+	out, err := InitAndApply(options)
 
 	require.Error(t, err)
 	require.Contains(t, out, "This is the first run, exiting with an error")
@@ -56,7 +59,10 @@ func TestApplyWithErrorWithRetry(t *testing.T) {
 		},
 	}
 
-	out := InitAndApply(options)
+	out, err := InitAndApply(options)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	require.Contains(t, out, "This is the first run, exiting with an error")
 }
