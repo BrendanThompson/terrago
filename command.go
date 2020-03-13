@@ -30,7 +30,6 @@ func GetCommonOptions(options *Options, args ...string) (*Options, []string) {
 // RunTerraformCommand runs `terraform` with the given arguments
 // and options. It then returns stdout/stderr
 func RunTerraformCommand(additionalOptions *Options, additionalArgs ...string) (string, error) {
-	//TODO: Implement `GetCommonOptions`
 	options, args := GetCommonOptions(additionalOptions, additionalArgs...)
 
 	cmd := shell.Command{
@@ -43,8 +42,8 @@ func RunTerraformCommand(additionalOptions *Options, additionalArgs ...string) (
 
 	description := fmt.Sprintf("%s %v", options.TerraformBinary, args)
 
-	return retry.DoWithRetryableErrorsE(description, options.RetryableTerraformErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
-		return shell.RunCommandAndGetOutputE(cmd)
+	return retry.DoWithRetryableErrors(description, options.RetryableTerraformErrors, options.MaxRetries, options.TimeBetweenRetries, func() (string, error) {
+		return shell.RunCommandAndGetOutput(cmd)
 	})
 }
 
@@ -61,7 +60,7 @@ func GetExitCodeForTerraformCommand(additionalOptions *Options, additionalArgs .
 		OutputMaxLineSize: options.OutputMaxLineSize,
 	}
 
-	_, err := shell.RunCommandAndGetOutputE(cmd)
+	_, err := shell.RunCommandAndGetOutput(cmd)
 	if err == nil {
 		return DefaultSuccessExitCode, nil
 	}

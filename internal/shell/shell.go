@@ -15,44 +15,24 @@ import (
 
 // Command is a struct to define commands
 type Command struct {
-	Command string // The command to run
-	Args []string //The arguments to pass to the command
-	WorkingDir string // The working directory for the command
-	Env map[string]string // Additional environment variables to set
-	OutputMaxLineSize int // The max line size of the stdout and stderr in bytes
+	Command           string            // The command to run
+	Args              []string          //The arguments to pass to the command
+	WorkingDir        string            // The working directory for the command
+	Env               map[string]string // Additional environment variables to set
+	OutputMaxLineSize int               // The max line size of the stdout and stderr in bytes
 }
 
-// RunCommand runs a shell command and redirects its stdout and stderr
-// to the stdout of the script itself
-func RunCommand(command Command) {
-	err := RunCommandE(command)
-	if err != nil {
-		//TODO: refactor to use zap
-		log.Fatal(err)
-	}
-}
-
-// RunCommandE runs a shell command and redirects its stdout and stderr to the stdout of the atomic script itself.
-func RunCommandE(command Command) error {
-	_, err := RunCommandAndGetOutputE(command)
+// RunCommand runs a shell command and redirects its stdout and stderr to the stdout of the atomic script itself.
+func RunCommand(command Command) error {
+	_, err := RunCommandAndGetOutput(command)
 	return err
 }
 
 // RunCommandAndGetOutput runs a shell command and returns its stdout and stderr as a string. The stdout and stderr of that command will also
 // be printed to the stdout and stderr of this Go program to make debugging easier.
-func RunCommandAndGetOutput(command Command) string {
-	out, err := RunCommandAndGetOutputE(command)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return out
-}
-
-// RunCommandAndGetOutputE runs a shell command and returns its stdout and stderr as a string. The stdout and stderr of that command will also
-// be printed to the stdout and stderr of this Go program to make debugging easier.
-func RunCommandAndGetOutputE(command Command) (string, error) {
+func RunCommandAndGetOutput(command Command) (string, error) {
 	allOutput := []string{}
-	err := runCommandAndStoreOutputE(command, &allOutput, &allOutput)
+	err := runCommandAndStoreOutput(command, &allOutput, &allOutput)
 
 	output := strings.Join(allOutput, "\n")
 	return output, err
@@ -60,32 +40,20 @@ func RunCommandAndGetOutputE(command Command) (string, error) {
 
 // RunCommandAndGetStdOut runs a shell command and returns solely its stdout (but not stderr) as a string. The stdout
 // and stderr of that command will also be printed to the stdout and stderr of this Go program to make debugging easier.
-// If there are any errors, fail the test.
-func RunCommandAndGetStdOut(command Command) string {
-	output, err := RunCommandAndGetStdOutE(command)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return output
-}
-
-// RunCommandAndGetStdOutE runs a shell command and returns solely its stdout (but not stderr) as a string. The stdout
-// and stderr of that command will also be printed to the stdout and stderr of this Go program to make debugging easier.
-func RunCommandAndGetStdOutE(command Command) (string, error) {
+func RunCommandAndGetStdOut(command Command) (string, error) {
 	stdout := []string{}
 	stderr := []string{}
-	err := runCommandAndStoreOutputE(command, &stdout, &stderr)
+	err := runCommandAndStoreOutput(command, &stdout, &stderr)
 
 	output := strings.Join(stdout, "\n")
 	return output, err
 }
 
-// runCommandAndStoreOutputE runs a shell command and stores each line from stdout and stderr in the given
+// runCommandAndStoreOutput runs a shell command and stores each line from stdout and stderr in the given
 // storedStdout and storedStderr variables, respectively. The stdout and stderr of that command will also
 // be printed to the stdout and stderr of this Go program to make debugging easier.
-func runCommandAndStoreOutputE(command Command, storedStdout *[]string, storedStderr *[]string) error {
-	//TODO: refactor to use zap
-	log.Printf("Running command %s with args %s", command.Command, command.Args)
+func runCommandAndStoreOutput(command Command, storedStdout *[]string, storedStderr *[]string) error {
+	log.Printf("running command %s with args %s", command.Command, command.Args)
 
 	cmd := exec.Command(command.Command, command.Args...)
 	cmd.Dir = command.WorkingDir
